@@ -363,24 +363,6 @@ class STAPP(object):
             with tpt1:
                 coor = self._RETURNCOOR(fileinit.ENLEM,fileinit.BOYLAM)
                 self._CREATECLUSTERS(coor)
-                st.pydeck_chart(pydeck.Deck(map_style=None,
-                                                initial_view_state=pydeck.ViewState(latitude=38,
-                                                                                    longitude=35,
-                                                                                    zoom=5,
-                                                                                    pitch=20),
-                                                layers=[pydeck.Layer("HexagonLayer",
-                                                                      data=fileinit,
-                                                                      get_position="[BOYLAM,ENLEM]",
-                                                                      radius=300,
-                                                                      elevation_scale=50,
-                                                                      elevation_range=[50,7000],
-                                                                      pickable=True,
-                                                                      extruded=True),
-                                                        pydeck.Layer("ScatterplotLayer",
-                                                                      data=fileinit,
-                                                                      get_position="[BOYLAM,ENLEM]",
-                                                                      get_color="[20,10,250,160]",
-                                                                      get_radius=300)]))
             with tpt2:
                 st.dataframe(fileinit)
                 st.download_button("Veriyi İndir",
