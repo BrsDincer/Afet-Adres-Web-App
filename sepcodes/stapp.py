@@ -201,11 +201,9 @@ class STAPP(object):
             tot = len(self.__adiyaman["ADRES"].values)+len(self.__hatay["ADRES"].values)+len(self.__maras["ADRES"].values)+len(self.__antep["ADRES"].values)
             st.metric(label="KULLANICILAR TARAFINDAN GİRİLEN ADRES VERİSİ",
                        value=tot)
-        md1,md2,md3,md4,md5 = st.tabs(["SORGU PANELİ",
-                                       "ADRES BİLDİRİMİ YAP",
-                                       "İNTERNET TABANLI TARAMA",
-                                       "BİLDİRİLEN ADRESLER",
-                                       "VERİLER"])
+        md1,md2,md3 = st.tabs(["SORGU PANELİ",
+                               "ADRES BİLDİRİMİ",
+                               "BİLDİRİLEN ADRESLER"])
         with md1:
             st.subheader("SORGU PANELİ")
             st.caption("Kullanıcıların gönderdiği adresler içinde tarama yapılacaktır")
@@ -282,45 +280,6 @@ class STAPP(object):
             st.markdown(CONTACT_US_FORM,
                         unsafe_allow_html=True)
         with md3:
-            st.subheader("İNTERNET TABANLI TARAMA")
-            st.caption("İnternet kullanıcıları tarafından paylaşılan yardım çağrılarını içermektedir")
-            tpt1,tpt2,tpt3 = st.tabs(["HARİTA",
-                                      "VERİ",
-                                      "İNCELEME"])
-            self.__readinternetscan.drop_duplicates()
-            md = self._CONVERT_DF(self.__readinternetscan)
-            with tpt1:
-                coor = self._RETURNCOOR(self.__readinternetscan.ENLEM,self.__readinternetscan.BOYLAM)
-                self._CREATECLUSTERS(coor)
-            with tpt2:
-                st.dataframe(self.__readinternetscan)
-                st.download_button("Veriyi İndir",
-                                    data=md,
-                                    file_name="internet_taramasi.csv",
-                                    mime="text/csv")
-            with tpt3:
-                deb,chl,pro,inj = WORDSEARCH()._RUN_FOR_COUNT(self.__readinternetscan["MESAJ"])
-                st.markdown(f":red_circle: **{str(deb)}** mesaj içinde enkaz altında kalmayla ilgili sorun tespit edildi",
-                            unsafe_allow_html = True)
-                with st.expander("Veriyi gör"):
-                    self.__readdebrisneed.drop_duplicates()
-                    st.dataframe(self.__readdebrisneed)
-                st.markdown(f":red_circle: **{str(chl)}** mesaj içinde çocuk malzemesi ihtiyacı tespit edildi",
-                            unsafe_allow_html = True)
-                with st.expander("Veriyi gör"):
-                    self.__readchildneed.drop_duplicates()
-                    st.dataframe(self.__readchildneed)
-                st.markdown(f":red_circle: **{str(pro)}** mesaj içinde genel erzak ihtiyacı tespit edildi",
-                            unsafe_allow_html = True)
-                with st.expander("Veriyi gör"):
-                    self.__readprovisionneed.drop_duplicates()
-                    st.dataframe(self.__readprovisionneed)
-                st.markdown(f":red_circle: **{str(inj)}** mesaj içinde yaralanma tespit edildi",
-                            unsafe_allow_html = True)
-                with st.expander("Veriyi gör"):
-                    self.__readinjuryneed.drop_duplicates()
-                    st.dataframe(self.__readinjuryneed)
-        with md4:
             st.subheader("BİLDİRİLEN ADRESLER")
             st.caption("Kullanıcılar tarafından bildirilen ek adresleri içermektedir")
             hd1,hd2,hd3,hd4 = st.tabs(["ADIYAMAN",
@@ -371,8 +330,49 @@ class STAPP(object):
                                            mime="text/csv")
                 else:
                     st.text("Henüz veri bulunmamaktadır")
+        md4,md5 = st.tabs(["İNTERNET TARAMASI",
+                           "GENEL VERİLER"])
+        with md4:
+            st.subheader("İNTERNET TABANLI TARAMA")
+            st.caption("İnternet kullanıcıları tarafından paylaşılan yardım çağrılarını içermektedir")
+            tpt1,tpt2,tpt3 = st.tabs(["HARİTA",
+                                      "VERİ",
+                                      "İNCELEME"])
+            self.__readinternetscan.drop_duplicates()
+            md = self._CONVERT_DF(self.__readinternetscan)
+            with tpt1:
+                coor = self._RETURNCOOR(self.__readinternetscan.ENLEM,self.__readinternetscan.BOYLAM)
+                self._CREATECLUSTERS(coor)
+            with tpt2:
+                st.dataframe(self.__readinternetscan)
+                st.download_button("Veriyi İndir",
+                                    data=md,
+                                    file_name="internet_taramasi.csv",
+                                    mime="text/csv")
+            with tpt3:
+                deb,chl,pro,inj = WORDSEARCH()._RUN_FOR_COUNT(self.__readinternetscan["MESAJ"])
+                st.markdown(f":red_circle: **{str(deb)}** mesaj içinde enkaz altında kalmayla ilgili sorun tespit edildi",
+                            unsafe_allow_html = True)
+                with st.expander("Veriyi gör"):
+                    self.__readdebrisneed.drop_duplicates()
+                    st.dataframe(self.__readdebrisneed)
+                st.markdown(f":red_circle: **{str(chl)}** mesaj içinde çocuk malzemesi ihtiyacı tespit edildi",
+                            unsafe_allow_html = True)
+                with st.expander("Veriyi gör"):
+                    self.__readchildneed.drop_duplicates()
+                    st.dataframe(self.__readchildneed)
+                st.markdown(f":red_circle: **{str(pro)}** mesaj içinde genel erzak ihtiyacı tespit edildi",
+                            unsafe_allow_html = True)
+                with st.expander("Veriyi gör"):
+                    self.__readprovisionneed.drop_duplicates()
+                    st.dataframe(self.__readprovisionneed)
+                st.markdown(f":red_circle: **{str(inj)}** mesaj içinde yaralanma tespit edildi",
+                            unsafe_allow_html = True)
+                with st.expander("Veriyi gör"):
+                    self.__readinjuryneed.drop_duplicates()
+                    st.dataframe(self.__readinjuryneed)
         with md5:
-            st.subheader("VERİLER")
+            st.subheader("GEREKLİ VERİLER")
             st.caption("Afet sırasında gerekli olabilecek veriler yer almaktadır")
             with st.expander("**İstasyonlar | Operatörler | Konaklama ve Sığınma Yerleri**"):
                 dtd1,dtd2,dtd3 = st.tabs(["İSTASYONLAR",
