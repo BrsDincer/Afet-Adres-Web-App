@@ -14,3 +14,7 @@ caching = false
 [browser]
 
 gatherUsageStats = false
+
+[theme]
+
+base="light"
