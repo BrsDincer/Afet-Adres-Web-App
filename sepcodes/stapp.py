@@ -8,19 +8,36 @@ from folium import plugins
 from streamlit_folium import folium_static
 
 rt = os.path.dirname(os.path.relpath((__file__)))
-
 class STAPP(object):
     def __init__(self):
-        self.__pt = "ADDRESS GATHERING SYSTEM - EMERGENCY"
+        self.__pt = "Disaster Coordination - Assistance and Analysis Platform"
         self.__ly = "wide"
         self.__ss = "expanded"
         self.__adiyaman = None
         self.__maras = None
         self.__hatay = None
         self.__antep = None
+        self.__warning_alert = os.path.join(rt,"warning__alert.wav")
+        self.__here_alert = os.path.join(rt,"here_alert.wav")
+        self.__banner_logo = os.path.join(rt,"banner_all.png")
         self.__tl = YAMLREADING()._TILE()
+        self.__readinternetscan = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/internet_scan.csv")._READFILE()
+        self.__readuserinputs = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/deprem_input.csv")._READFILE()
+        self.__readgasstation = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/gas_station.csv")._READFILE()
+        self.__readoperator = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/crane_operator.csv")._READFILE()
+        self.__readchildneed = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/child_need_data.csv")._READFILE()
+        self.__readinjuryneed = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/injury_need_data.csv")._READFILE()
+        self.__readprovisionneed = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/provision_need_data.csv")._READFILE()
+        self.__readdebrisneed = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/debris_need_data.csv")._READFILE()
+        self.__readkonaklama = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/ShelterandAccommodationAreas.csv")._READFILE()
+        self.__readfoodpoints = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/FoodSpots.csv")._READFILE()
+        self.__readtransportationtodisaster = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/TransportationToDisasterAreas.csv")._READFILE()
+        self.__readshelterforoutside = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/ShelterOpportunitiesOutsideTheDisasterArea.csv")._READFILE()
+        self.__readpharmacytrucks = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/PharmacyTrucks.csv")._READFILE()
+        self.__readaidtrucks = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/LocationsofAidTrucks.csv")._READFILE()
+        self.__readcontactnumber = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/AuthorizedContactNumbers.csv")._READFILE()
     def __str__(self):
-        return "ADDRESS GATHERING WEB APPLOCATION - PROCESS"
+        return "Disaster Coordination - Assistance and Analysis [WEB APPLICATION - PROCESS]"
     def __call__(self):
         return None
     def __getstate__(self):
@@ -29,7 +46,7 @@ class STAPP(object):
         return STAPP.__doc__
     def _CONVERT_DF(self,dtinit:classmethod):
         return dtinit.to_csv().encode("utf-8")
-    def _RETURNMAP(self,tl:str="Stamen Terrain",
+    def _RETURNMAP(self,tl:str="http://services.arcgisonline.com/arcgis/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
                    lc:list=[38,35],
                    zm:int=5):
         mf = folium.Map(tiles=tl,
@@ -70,101 +87,29 @@ class STAPP(object):
         st.set_page_config(page_title=self.__pt,
                            layout=self.__ly,
                            initial_sidebar_state=self.__ss,
-                           menu_items={"About":"ADDRESS GATHERING SYSTEM - EMERGENCY"})
-    def _PRINTBANNER(self):
-        st.header("ADRES BİLGİLENDİRME VE TESPİT SİSTEMİ")
-        st.caption("Bu platform afetzedelere erişimi kolaylaştırmak, adres tespiti ve bilgilendirme için oluşturulmuştur")
-        ct1,ct2,ct3 = st.columns(3)
-        with ct1:
-            st.image(Image.open(os.path.join(rt,"AKUT.png")).resize((170,100)))
-            st.markdown(":o: [AKUT Bağış Sayfasına Git](https://www.akut.org.tr/bagis-yap)",
-                        unsafe_allow_html=True)
-            with st.expander("İletişim"):
-                _infoak = """
-                
-        :triangular_flag_on_post: https://www.akut.org.tr/iletisim
-        
-                """
-                st.markdown(_infoak,unsafe_allow_html=True)
-        with ct2:
-            st.image(Image.open(os.path.join(rt,"AFAD.png")).resize((240,100)))
-            st.markdown(":o: [AFAD Bağış Sayfasına Git](https://www.afad.gov.tr/depremkampanyasi2)",
-                        unsafe_allow_html=True)
-            with st.expander("İletişim"):
-                _infoex = """
-
-        :triangular_flag_on_post: [Diyarbakır](https://diyarbakir.afad.gov.tr/) : 0412 326 1156\n\n
-        :triangular_flag_on_post: [Hatay](https://hatay.afad.gov.tr/) : 0326 112 0000\n\n
-        :triangular_flag_on_post: [Maraş](https://kahramanmaras.afad.gov.tr/): 0344 221 4991\n\n
-        :triangular_flag_on_post: [Antep](https://gaziantep.afad.gov.tr/) : 0342 428 1118\n\n
-        :triangular_flag_on_post: [Adana](https://adana.afad.gov.tr/) : 0322 227 2854\n\n
-        :triangular_flag_on_post: [Adıyaman](https://adiyaman.afad.gov.tr/) : 0416 216 1231\n\n
-        :triangular_flag_on_post: [Urfa](https://sanliurfa.afad.gov.tr/) : 0414 313 7290\n\n
-        :triangular_flag_on_post: [Malatya](https://malatya.afad.gov.tr/) : 0422 212 8432\n\n
-        :triangular_flag_on_post: [Mardin](https://mardin.afad.gov.tr/) : 0482 212 3740\n\n
-
-                """
-                st.markdown(_infoex,unsafe_allow_html=True)
-        with ct3:
-            st.image(Image.open(os.path.join(rt,"ahbap.png")).resize((240,100)))
-            st.markdown(":o: [AHBAP Bağış Sayfasına Git](https://ahbap.org/bagisci-ol)",
-                        unsafe_allow_html=True)
-            with st.expander("İletişim"):
-                _infoah = """
-                
-        :triangular_flag_on_post: https://ahbap.org/iletisim
-                
-                """
-                st.markdown(_infoah,unsafe_allow_html=True)
-        st.subheader("ÇAĞRI VE YARDIM TALEBİ SAYISI")
-        mtrc1,mtrc2,mtrc3,mtrc4,mtrc5,mtrc6,mtrc7 = st.columns(7)
-        func = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/internet_scan.csv")
-        fileinitall = func._READFILE()
-        hataycount,adiyamancount,malatyacount,marascount,antepcount,adanacount,diyarcount = self._RETURNLABELS(fileinitall)
-        with mtrc1:
-            st.metric(label="HATAY",
-                      value=hataycount,delta=hataycount,delta_color="off")
-        with mtrc2:
-            st.metric(label="ADIYAMAN",
-                      value=adiyamancount,delta=adiyamancount,delta_color="off")
-        with mtrc3:
-            st.metric(label="MALATYA",
-                      value=malatyacount,delta=malatyacount,delta_color="off")
-        with mtrc4:
-            st.metric(label="MARAŞ",
-                      value=marascount,delta=marascount,delta_color="off")
-        with mtrc5:
-            st.metric(label="ANTEP",
-                      value=antepcount,delta=antepcount,delta_color="off")
-        with mtrc6:
-            st.metric(label="ADANA",
-                      value=adanacount,delta=adanacount,delta_color="off")
-        with mtrc7:
-            st.metric(label="DİYARBAKIR",
-                      value=diyarcount,delta=diyarcount,delta_color="off")
+                           menu_items={"About":"**Disaster Coordination - _Assistance and Analysis Platform_**",
+                                       "Get Help":"https://github.com/BrsDincer/AfetAdresWebApp/"})
+    def _ALARMFUNC(self):
+        st.caption("_Butonlara basarak alarmları aktif et_")
+        btt1,btt2 = st.columns(2)
+        with btt1:
+            with st.expander(":loudspeaker: BURADAYIM"):
+                st.audio(self.__here_alert)
+        with btt2:
+            with st.expander(":loudspeaker: TEHLİKE"):
+                st.audio(self.__warning_alert)
     def _RETURNCLUSTERFUNC(self):
-        return """
-    function(cluster) {
-    var childCount = cluster.getChildCount(); 
-    var c = ' marker-cluster-';
-
-    if (childCount < 50) {
-        c += 'large';
-    } else if (childCount < 300) {
-        c += 'medium';
-    } else {
-        c += 'small';
-    }
-
-    return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>', className: 'marker-cluster' + c, iconSize: new L.Point(40, 40) });
-    }"""
+        pass #future use
+    def _PRINTBANNER(self):
+        st.image(Image.open(self.__banner_logo),use_column_width="always")
+        self._ALARMFUNC()
+        st.header("**ADRES BİLGİLENDİRME VE TESPİT SİSTEMİ**")
     def _DATAACCESS(self):
-        func = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/deprem_input.csv")
-        fileinit = func._READFILE()
-        self.__adiyaman = fileinit[fileinit["SEHIR"] == "Adıyaman"].reset_index(drop=True)
-        self.__maras = fileinit[fileinit["SEHIR"] == "Maraş"].reset_index(drop=True)
-        self.__hatay = fileinit[fileinit["SEHIR"] == "Hatay"].reset_index(drop=True)
-        self.__antep = fileinit[fileinit["SEHIR"] == "Antep"].reset_index(drop=True)
+        self.__readuserinputs.drop_duplicates()
+        self.__adiyaman = self.__readuserinputs[self.__readuserinputs["SEHIR"] == "Adıyaman"].reset_index(drop=True)
+        self.__maras = self.__readuserinputs[self.__readuserinputs["SEHIR"] == "Maraş"].reset_index(drop=True)
+        self.__hatay = self.__readuserinputs[self.__readuserinputs["SEHIR"] == "Hatay"].reset_index(drop=True)
+        self.__antep = self.__readuserinputs[self.__readuserinputs["SEHIR"] == "Antep"].reset_index(drop=True)
         self.__adiyaman["ADRES"] = self.__adiyaman["ADRES"].str.capitalize()
         self.__maras["ADRES"] = self.__maras["ADRES"].str.capitalize()
         self.__hatay["ADRES"] = self.__hatay["ADRES"].str.capitalize()
@@ -218,6 +163,18 @@ class STAPP(object):
                              attr="<p>COORDINATES</p>").add_to(mf)
         folium.LayerControl().add_to(mf)
         folium_static(mf)
+    def _CREATEMANUELMAP(self,ddtr:classmethod,
+                         attr1:str,
+                         attr2:str):
+        mf = self._RETURNMAP()
+        plugins.MiniMap().add_to(mf)
+        for xlt,xln in zip(ddtr[attr1],ddtr[attr2]):
+            folium.Marker(location=[float(xlt),float(xln)],
+                          popup=f"<h4><p>KOORDİNAT:\n{xlt},{xln}</p></h4>",
+                          tooltip="Click me!",
+                          icon=folium.Icon(color="red",
+                                           icon="info-sign")).add_to(mf)
+        folium_static(mf)
     def _CREATECLUSTERS(self,cr:list):
         mf = self._RETURNMAP()
         plugins.MiniMap().add_to(mf)
@@ -234,10 +191,8 @@ class STAPP(object):
         folium_static(mf)
     def _TABS(self):
         self._DATAACCESS()
-        func = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/internet_scan.csv")
-        fileinitall = func._READFILE()
-        hataycount,adiyamancount,malatyacount,marascount,antepcount,adanacount,diyarcount = self._RETURNLABELS(fileinitall)
-        st.subheader("İNCELEME VE ERİŞİM PANELLERİ")
+        self.__readinternetscan.drop_duplicates()
+        hataycount,adiyamancount,malatyacount,marascount,antepcount,adanacount,diyarcount = self._RETURNLABELS(self.__readinternetscan)
         ypp1,ypp2 = st.columns(2)
         with ypp1:
             st.metric(label="TOPLAM İNCELENEN ADRES VERİSİ",
@@ -252,15 +207,16 @@ class STAPP(object):
                                        "BİLDİRİLEN ADRESLER",
                                        "VERİLER"])
         with md1:
-            smc = 0
+            st.subheader("SORGU PANELİ")
             st.caption("Kullanıcıların gönderdiği adresler içinde tarama yapılacaktır")
-            st.caption("Cümle sonunda boşluk bırakmayınız ve aramak istediğiniz adresi doğru girmeye çalışınız")
+            st.caption("**Cümle sonunda boşluk bırakmayınız ve aramak istediğiniz adresi doğru girdiğinizden emin olunuz**")
             ms = st.text_area("ARAMAK İSTEDİĞİNİZ ADRESİ GİRİNİZ",
                               help="Erişmek veya sorgulamak için adres giriniz")
             rb = st.button("ARA")
             if rb:
+                smc = 0
                 if len(ms) > 7:
-                    for xc,xv in enumerate(self.__adiyaman["ADRES"].values):
+                    for xc,xv in enumerate(self.__readinternetscan["ADRES"].values):
                         if (ms.lower() in xv.lower()) or (ms.lower() == xv.lower()):
                             st.info("Kayıt bulundu")
                             st.text(f'İSİM: {self.__adiyaman["ISIM"][xc]}')
@@ -269,41 +225,14 @@ class STAPP(object):
                             smc += 1
                         else:
                             pass
-                    for xc,xv in enumerate(self.__maras["ADRES"].values):
-                        if (ms.lower() in xv.lower()) or (ms.lower() == xv.lower()):
-                            st.info("Kayıt bulundu")
-                            st.text(f'İSİM: {self.__maras["ISIM"][xc]}')
-                            st.text(f'ŞEHİR: {self.__maras["SEHIR"][xc]}')
-                            st.text(f'ADRES: {self.__maras["ADRES"][xc]}')
-                            smc += 1
-                        else:
-                            pass
-                    for xc,xv in enumerate(self.__hatay["ADRES"].values):
-                        if (ms.lower() in xv.lower()) or (ms.lower() == xv.lower()):
-                            st.info("Kayıt bulundu")
-                            st.text(f'İSİM: {self.__hatay["ISIM"][xc]}')
-                            st.text(f'ŞEHİR: {self.__hatay["SEHIR"][xc]}')
-                            st.text(f'ADRES: {self.__hatay["ADRES"][xc]}')
-                            smc += 1
-                        else:
-                            pass
-                    for xc,xv in enumerate(self.__antep["ADRES"].values):
-                        if (ms.lower() in xv.lower()) or (ms.lower() == xv.lower()):
-                            st.info("Kayıt bulundu")
-                            st.text(f'İSİM: {self.__antep["ISIM"][xc]}')
-                            st.text(f'ŞEHİR: {self.__antep["SEHIR"][xc]}')
-                            st.text(f'ADRES: {self.__antep["ADRES"][xc]}')
-                            smc += 1
-                        else:
-                            pass
                     if smc == 0:
-                        st.warning("İstenilen kayıt bulunamadı")
-                        st.warning("Lütfen tabloları kontrol ediniz")
+                            st.warning("İstenilen kayıt bulunamadı, lütfen tabloları kontrol ediniz")
                     else:
                         pass
                 else:
                     st.error("Geçerli bir adres girdiğinizden emin olunuz")  
         with md2:
+            st.subheader("ADRES BİLDİRİMİ YAP")
             st.caption("Lütfen iletmek istediğiniz adres bilgilerini doğru girdiğinizden emin olunuz")
             CONTACT_US_FORM = """
         <style>
@@ -353,56 +282,51 @@ class STAPP(object):
             st.markdown(CONTACT_US_FORM,
                         unsafe_allow_html=True)
         with md3:
+            st.subheader("İNTERNET TABANLI TARAMA")
             st.caption("İnternet kullanıcıları tarafından paylaşılan yardım çağrılarını içermektedir")
             tpt1,tpt2,tpt3 = st.tabs(["HARİTA",
-                                 "VERİ",
-                                 "İNCELEME"])
-            func = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/internet_scan.csv")
-            fileinit = func._READFILE()
-            md = self._CONVERT_DF(fileinit)
+                                      "VERİ",
+                                      "İNCELEME"])
+            self.__readinternetscan.drop_duplicates()
+            md = self._CONVERT_DF(self.__readinternetscan)
             with tpt1:
-                coor = self._RETURNCOOR(fileinit.ENLEM,fileinit.BOYLAM)
+                coor = self._RETURNCOOR(self.__readinternetscan.ENLEM,self.__readinternetscan.BOYLAM)
                 self._CREATECLUSTERS(coor)
-                st.pydeck_chart(pydeck.Deck(map_style=None,
-                                                initial_view_state=pydeck.ViewState(latitude=38,
-                                                                                    longitude=35,
-                                                                                    zoom=5,
-                                                                                    pitch=20),
-                                                layers=[pydeck.Layer("HexagonLayer",
-                                                                      data=fileinit,
-                                                                      get_position="[BOYLAM,ENLEM]",
-                                                                      radius=300,
-                                                                      elevation_scale=50,
-                                                                      elevation_range=[50,7000],
-                                                                      pickable=True,
-                                                                      extruded=True),
-                                                        pydeck.Layer("ScatterplotLayer",
-                                                                      data=fileinit,
-                                                                      get_position="[BOYLAM,ENLEM]",
-                                                                      get_color="[20,10,250,160]",
-                                                                      get_radius=300)]))
             with tpt2:
-                st.dataframe(fileinit)
+                st.dataframe(self.__readinternetscan)
                 st.download_button("Veriyi İndir",
                                     data=md,
                                     file_name="internet_taramasi.csv",
                                     mime="text/csv")
             with tpt3:
-                deb,chl,pro,inj = WORDSEARCH()._RUN(fileinit["MESAJ"])
+                deb,chl,pro,inj = WORDSEARCH()._RUN_FOR_COUNT(self.__readinternetscan["MESAJ"])
                 st.markdown(f":red_circle: **{str(deb)}** mesaj içinde enkaz altında kalmayla ilgili sorun tespit edildi",
                             unsafe_allow_html = True)
+                with st.expander("Veriyi gör"):
+                    self.__readdebrisneed.drop_duplicates()
+                    st.dataframe(self.__readdebrisneed)
                 st.markdown(f":red_circle: **{str(chl)}** mesaj içinde çocuk malzemesi ihtiyacı tespit edildi",
                             unsafe_allow_html = True)
+                with st.expander("Veriyi gör"):
+                    self.__readchildneed.drop_duplicates()
+                    st.dataframe(self.__readchildneed)
                 st.markdown(f":red_circle: **{str(pro)}** mesaj içinde genel erzak ihtiyacı tespit edildi",
                             unsafe_allow_html = True)
+                with st.expander("Veriyi gör"):
+                    self.__readprovisionneed.drop_duplicates()
+                    st.dataframe(self.__readprovisionneed)
                 st.markdown(f":red_circle: **{str(inj)}** mesaj içinde yaralanma tespit edildi",
                             unsafe_allow_html = True)
+                with st.expander("Veriyi gör"):
+                    self.__readinjuryneed.drop_duplicates()
+                    st.dataframe(self.__readinjuryneed)
         with md4:
+            st.subheader("BİLDİRİLEN ADRESLER")
+            st.caption("Kullanıcılar tarafından bildirilen ek adresleri içermektedir")
             hd1,hd2,hd3,hd4 = st.tabs(["ADIYAMAN",
-                                           "MARAŞ",
-                                           "HATAY",
-                                           "ANTEP"])
-            st.caption("Kullanıcılar tarafından bildirilen adres verilerini içermektedir")
+                                       "MARAŞ",
+                                       "HATAY",
+                                       "ANTEP"])
             with hd1:
                 st.subheader("ADIYAMAN - BİLGİLENDİRME VE ERİŞİM")
                 if len(self.__adiyaman["ADRES"]) != 0:
@@ -431,9 +355,9 @@ class STAPP(object):
                     st.dataframe(self.__hatay)
                     md = self._CONVERT_DF(self.__hatay)
                     st.download_button("Veriyi İndir",
-                                           data=md,
-                                           file_name="hatay.csv",
-                                           mime="text/csv")
+                                       data=md,
+                                       file_name="hatay.csv",
+                                       mime="text/csv")
                 else:
                     st.text("Henüz veri bulunmamaktadır")
             with hd4:
@@ -450,29 +374,168 @@ class STAPP(object):
         with md5:
             st.subheader("VERİLER")
             st.caption("Afet sırasında gerekli olabilecek veriler yer almaktadır")
-            dtd1,dtd2 = st.tabs(["İSTASYONLAR",
-                                 "OPERATÖRLER"])
-            with dtd1:
-                st.caption("İstasyonlarla ilgili bilgiler içermektedir")
-                func = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/gas_station.csv")
-                fileinit = func._READFILE()
-                mdtone = self._CONVERT_DF(fileinit)
-                st.dataframe(fileinit)
-                st.download_button("Veriyi İndir",
-                                   data=mdtone,
-                                   file_name="istasyonlar.csv",
-                                   mime="text/csv")
-            with dtd2:
-                st.caption("Operatörlerle ilgili bilgiler içermektedir")
-                st.caption("Veriler izinli paylaşım kapsamındadır")
-                func = DATAGATHERING("https://afetadres.s3.eu-central-1.amazonaws.com/crane_operator.csv")
-                fileinit = func._READFILE()
-                mdttwo = self._CONVERT_DF(fileinit)
-                st.dataframe(fileinit)
-                st.download_button("Veriyi İndir",
-                                   data=mdttwo,
-                                   file_name="operatörler.csv",
-                                   mime="text/csv")
+            with st.expander("**İstasyonlar | Operatörler | Konaklama ve Sığınma Yerleri**"):
+                dtd1,dtd2,dtd3 = st.tabs(["İSTASYONLAR",
+                                          "OPERATÖRLER",
+                                          "KONAKLAMA VE SIĞINMA"])
+                with dtd1:
+                    st.caption("_İstasyonlarla ilgili bilgiler içermektedir_")
+                    self.__readgasstation.drop_duplicates()
+                    mdtone = self._CONVERT_DF(self.__readgasstation)
+                    st.dataframe(self.__readgasstation)
+                    st.download_button("Veriyi İndir",
+                                       data=mdtone,
+                                       file_name="istasyonlar.csv",
+                                       mime="text/csv")
+                with dtd2:
+                    st.caption("_Operatörlerle ilgili bilgiler içermektedir_")
+                    self.__readoperator.drop_duplicates()
+                    mdttwo = self._CONVERT_DF(self.__readoperator)
+                    st.dataframe(self.__readoperator)
+                    st.download_button("Veriyi İndir",
+                                       data=mdttwo,
+                                       file_name="operatörler.csv",
+                                       mime="text/csv")
+                with dtd3:
+                    st.caption("_Konaklama ve sığınma yerleriyle ilgili bilgiler içermektedir_")
+                    self.__readkonaklama.drop_duplicates()
+                    mrsdt = self._CONVERT_DF(self.__readkonaklama)
+                    st.dataframe(self.__readkonaklama)
+                    st.download_button("Veriyi İndir",
+                                           data=mrsdt,
+                                           file_name="siginmakonaklama.csv",
+                                           mime="text/csv")
+            with st.expander("**Yemek Dağıtım Yerleri | Afet Alanına Ulaşım | Afet Alanı Dışındaki Yerler**"):
+                dtd4,dtd5,dtd6 = st.tabs(["YEMEK DAĞITIM YERLERİ",
+                                     "AFET ALANINA ULAŞIM SAĞLAYAN ARAÇLAR",
+                                     "AFET ALANI DIŞINDAKİ SIĞINMA YERLERİ"])
+                with dtd4:
+                    st.caption("_Yemek dağıtım yerleri ile ilgili bilgiler içermektedir_")
+                    self.__readfoodpoints.drop_duplicates()
+                    mrsff = self._CONVERT_DF(self.__readfoodpoints)
+                    st.dataframe(self.__readfoodpoints)
+                    st.download_button("Veriyi İndir",
+                                           data=mrsff,
+                                           file_name="yemekyerleri.csv",
+                                           mime="text/csv")
+                with dtd5:
+                    st.caption("_Afet alanına taşıma sağlayan araçlar ile ilgili bilgiler içermektedir_")
+                    self.__readtransportationtodisaster.drop_duplicates()
+                    mrstrt = self._CONVERT_DF(self.__readtransportationtodisaster)
+                    st.dataframe(self.__readtransportationtodisaster)
+                    st.download_button("Veriyi İndir",
+                                           data=mrstrt,
+                                           file_name="afetalaninatasima.csv",
+                                           mime="text/csv")
+                with dtd6:
+                    st.caption("_Afet alanı dışındaki sığınma yerleri ile ilgili bilgiler içermektedir_")
+                    self.__readshelterforoutside.drop_duplicates()
+                    mrsout = self._CONVERT_DF(self.__readshelterforoutside)
+                    st.dataframe(self.__readshelterforoutside)
+                    st.download_button("Veriyi İndir",
+                                           data=mrsout,
+                                           file_name="afetalanidisi.csv",
+                                           mime="text/csv")
+            with st.expander("**Eczane Tırları | Yardım Tırları | Önemli Numaralar**"):
+                dtd7,dtd8,dtd9 = st.tabs(["ECZANE TIRLARI",
+                                          "YARDIM TIRLARI",
+                                          "ÖNEMLİ NUMARALAR"])
+                with dtd7:
+                    st.caption("_Eczane tırları ile ilgili bilgiler içermektedir_")
+                    self.__readpharmacytrucks.drop_duplicates()
+                    mrspht = self._CONVERT_DF(self.__readpharmacytrucks)
+                    st.dataframe(self.__readpharmacytrucks)
+                    st.download_button("Veriyi İndir",
+                                           data=mrspht,
+                                           file_name="eczanetirlari.csv",
+                                           mime="text/csv")
+                with dtd8:
+                    st.caption("_Yardım tırları ile ilgili bilgiler içermektedir_")
+                    self.__readaidtrucks.drop_duplicates()
+                    mrsaid = self._CONVERT_DF(self.__readaidtrucks)
+                    st.dataframe(self.__readaidtrucks)
+                    st.download_button("Veriyi İndir",
+                                           data=mrsaid,
+                                           file_name="yardimtirlari.csv",
+                                           mime="text/csv")
+                with dtd9:
+                    st.caption("_Önemli iletişim numaraları ile ilgili bilgiler içermektedir_")
+                    self.__readcontactnumber.drop_duplicates()
+                    mrscnc = self._CONVERT_DF(self.__readcontactnumber)
+                    st.dataframe(self.__readcontactnumber)
+                    st.download_button("Veriyi İndir",
+                                           data=mrscnc,
+                                           file_name="önemlinumaralar.csv",
+                                           mime="text/csv")
+        st.caption("_Bu platform afetzedelere erişimi kolaylaştırmak, adres tespiti, bilgilendirme ve veri paylaşımı için yaratılmıştır_")
+        st.markdown("**Ek Bilgiler**",
+                    unsafe_allow_html=True)
+        with st.expander("**Çağrı ve Yardım İstatistikleri**"):
+            st.subheader("ÇAĞRI VE YARDIM TALEBİ SAYISI")
+            mtrc1,mtrc2,mtrc3,mtrc4,mtrc5,mtrc6,mtrc7 = st.columns(7)
+            self.__readinternetscan.drop_duplicates()
+            hataycount,adiyamancount,malatyacount,marascount,antepcount,adanacount,diyarcount = self._RETURNLABELS(self.__readinternetscan)
+            with mtrc1:
+                st.metric(label="HATAY",
+                          value=hataycount,delta=hataycount,delta_color="off")
+            with mtrc2:
+                st.metric(label="ADIYAMAN",
+                          value=adiyamancount,delta=adiyamancount,delta_color="off")
+            with mtrc3:
+                st.metric(label="MALATYA",
+                          value=malatyacount,delta=malatyacount,delta_color="off")
+            with mtrc4:
+                st.metric(label="MARAŞ",
+                          value=marascount,delta=marascount,delta_color="off")
+            with mtrc5:
+                st.metric(label="ANTEP",
+                          value=antepcount,delta=antepcount,delta_color="off")
+            with mtrc6:
+                st.metric(label="ADANA",
+                          value=adanacount,delta=adanacount,delta_color="off")
+            with mtrc7:
+                st.metric(label="DİYARBAKIR",
+                          value=diyarcount,delta=diyarcount,delta_color="off")
+        with st.expander("**Yardım Kuruluşlarının Bilgileri**"):
+            ct1,ct2,ct3 = st.columns(3)
+            with ct1:
+                st.image(Image.open(os.path.join(rt,"AFAD.png")).resize((240,100)))
+                st.markdown(":o: [AFAD Bağış Sayfasına Git](https://www.afad.gov.tr/depremkampanyasi2)",
+                            unsafe_allow_html=True)
+                _infoex = """
+    
+            :triangular_flag_on_post: [Diyarbakır](https://diyarbakir.afad.gov.tr/) : 0412 326 1156\n\n
+            :triangular_flag_on_post: [Hatay](https://hatay.afad.gov.tr/) : 0326 112 0000\n\n
+            :triangular_flag_on_post: [Maraş](https://kahramanmaras.afad.gov.tr/): 0344 221 4991\n\n
+            :triangular_flag_on_post: [Antep](https://gaziantep.afad.gov.tr/) : 0342 428 1118\n\n
+            :triangular_flag_on_post: [Adana](https://adana.afad.gov.tr/) : 0322 227 2854\n\n
+            :triangular_flag_on_post: [Adıyaman](https://adiyaman.afad.gov.tr/) : 0416 216 1231\n\n
+            :triangular_flag_on_post: [Urfa](https://sanliurfa.afad.gov.tr/) : 0414 313 7290\n\n
+            :triangular_flag_on_post: [Malatya](https://malatya.afad.gov.tr/) : 0422 212 8432\n\n
+            :triangular_flag_on_post: [Mardin](https://mardin.afad.gov.tr/) : 0482 212 3740\n\n
+    
+                    """
+                st.markdown(_infoex,unsafe_allow_html=True)
+            with ct2:
+                st.image(Image.open(os.path.join(rt,"AKUT.png")).resize((172,120)))
+                st.markdown(":o: [AKUT Bağış Sayfasına Git](https://www.akut.org.tr/bagis-yap)",
+                            unsafe_allow_html=True)
+                _infoak = """
+                    
+            :triangular_flag_on_post: https://www.akut.org.tr/iletisim
+            
+                    """
+                st.markdown(_infoak,unsafe_allow_html=True)
+            with ct3:
+                st.image(Image.open(os.path.join(rt,"ahbap.png")).resize((240,100)))
+                st.markdown(":o: [AHBAP Bağış Sayfasına Git](https://ahbap.org/bagisci-ol)",
+                            unsafe_allow_html=True)
+                _infoah = """
+                    
+            :triangular_flag_on_post: https://ahbap.org/iletisim
+                    
+                    """
+                st.markdown(_infoah,unsafe_allow_html=True)
 if __name__ == "__main__":
     STAPP()._CONF()
     STAPP()._PRINTBANNER()
@@ -480,4 +543,4 @@ if __name__ == "__main__":
         STAPP()._TABS()
     except Exception as err:
         print(str(err))
-        st.warning("Lütfen sistemin yüklenmesini bekleyin")
+        st.warning("Lütfen sistemin yüklenmesini bekleyin veya sayfayı yenileyin")
