@@ -96,7 +96,7 @@ class STAPP(object):
             with st.expander(":loudspeaker: BURADAYIM"):
                 st.audio(self.__here_alert)
         with btt2:
-            with st.expander(":loudspeaker: TEHLİKE"):
+            with st.expander(":loudspeaker: UYARI"):
                 st.audio(self.__warning_alert)
     def _RETURNCLUSTERFUNC(self):
         pass #future use
